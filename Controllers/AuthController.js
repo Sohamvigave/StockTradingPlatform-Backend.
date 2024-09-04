@@ -18,7 +18,7 @@ module.exports.Signup = async (req, res, next) => {
         });
         res
             .status(201)
-            .json({ message: "User signed in successfully", succes: true, user });
+            .json({ message: "User signed in successfully", success: true, user })
         next();
     } catch (error) {
         console.error(error);
@@ -35,18 +35,18 @@ module.exports.login = async (req, res, next) => {
         if (!user) {
             return res.json({ message: 'Incorrect email or password' });
         }
-        const auth = bcrypt.compare(password, user.password);
+        const auth = await bcrypt.compare(password, user.password);
         if (!auth) {
             return res.json({ message: 'Incorrect email or password' });
         }
-        res.cookie("token", user.id, {
+        const token = createSecretToken(user._id);
+        res.cookie("token", token, {
             withCredentials: true,
             httpOnly: false,
         });
-        // console.log(req.cookies);
-        res.json({ message: 'User logged in successful', success: true });
-        // next();
+        res.status(201).json({ message: "User logged in successfully", success: true });
+        next();
     } catch (error) {
         console.error(error);
     }
-}
+};
